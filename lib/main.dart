@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pr_2/screens/add_screen/add_std.dart';
 
 import 'model/data_model.dart';
-import 'screens/adsreensection/add_std.dart';
-import 'screens/home.dart';
+
+import 'screens/list_student/list_screen.dart';
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();

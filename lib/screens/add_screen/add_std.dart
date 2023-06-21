@@ -4,14 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../functions/db_funs.dart';
-import '../model/data_model.dart';
-import 'home.dart';
+import '../../functions/db_funs.dart';
+import '../../model/data_model.dart';
+import '../list_student/list_screen.dart';
+import 'widgets/imagecolumn.dart';
 
-class Updates extends StatefulWidget {
-  Updates({super.key, required this.model});
-  StudentModel model;
-  int? index;
+class Add extends StatefulWidget {
+  Add({super.key});
 
   final TextEditingController _name = TextEditingController();
   final TextEditingController _age = TextEditingController();
@@ -20,20 +19,10 @@ class Updates extends StatefulWidget {
   final _formkey = GlobalKey<FormState>();
 
   @override
-  State<Updates> createState() => _UpdatesState();
+  State<Add> createState() => _AddState();
 }
 
-class _UpdatesState extends State<Updates> {
-  @override
-  void initState() {
-    widget._name.text = widget.model.name;
-    widget._age.text = widget.model.age;
-
-    widget._phone.text = widget.model.phone;
-    widget._domain.text = widget.model.domain;
-    super.initState();
-  }
-
+class _AddState extends State<Add> {
   File? image;
   Future pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.camera);
@@ -59,11 +48,13 @@ class _UpdatesState extends State<Updates> {
           borderRadius: BorderRadius.circular(30),
         ),
         backgroundColor: Colors.amber,
-        title: Center(
-          child: Text(
-            ' Edit student',
-            style: TextStyle(color: Colors.black),
-          ),
+        title: Center(child: Text('Add student')),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back_ios),
+          color: Colors.black,
         ),
       ),
       body: Column(
@@ -76,9 +67,10 @@ class _UpdatesState extends State<Updates> {
           Center(
             child: CircleAvatar(
               backgroundImage: image == null
-                  ? FileImage(File(widget.model.img))
+                  ? AssetImage('images/avatar.png')
                   : FileImage(File(image!.path)) as ImageProvider,
               radius: 70,
+              backgroundColor: Colors.amber,
             ),
           ),
           SizedBox(
@@ -87,24 +79,11 @@ class _UpdatesState extends State<Updates> {
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  minimumSize: Size(150, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)),
-                  elevation: 10),
-              child: Column(
-                children: const [
-                  Icon(
-                    Icons.camera_alt_sharp,
-                    size: 24.0,
-                    color: Colors.black,
-                  ),
-                  Text(
-                    'Edit Image',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
+                  backgroundColor: Colors.amber,
+                  minimumSize: Size(200, 50)),
+              child: ImageColumn(),
               onPressed: () {
                 showModalBottomSheet(
                   backgroundColor: Colors.black,
@@ -127,8 +106,8 @@ class _UpdatesState extends State<Updates> {
                                 children: const [
                                   Icon(
                                     Icons.camera,
-                                    color: Colors.black,
                                     size: 24.0,
+                                    color: Colors.black,
                                   ),
                                   Text(
                                     'Camera',
@@ -202,6 +181,7 @@ class _UpdatesState extends State<Updates> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: 'Full Name',
+                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your full name',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -226,6 +206,7 @@ class _UpdatesState extends State<Updates> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: 'Age',
+                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your age',
                       // prefixIcon: Icon(Icons.numbers),
                       border: OutlineInputBorder(
@@ -251,7 +232,9 @@ class _UpdatesState extends State<Updates> {
                     maxLength: 10,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
+                      prefixText: "+91 ",
                       labelText: 'phone',
+                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your phone number',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -277,8 +260,8 @@ class _UpdatesState extends State<Updates> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: 'Domain',
+                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your domain',
-                      // prefixIcon: Icon(Icons.email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -299,12 +282,10 @@ class _UpdatesState extends State<Updates> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      elevation: 10,
-                      minimumSize: Size(200, 50),
-                    ),
+                        backgroundColor: Colors.amber,
+                        minimumSize: Size(200, 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30))),
                     onPressed: () {
                       log(widget._name.text);
                       addClick(context);
@@ -313,7 +294,7 @@ class _UpdatesState extends State<Updates> {
                       mainAxisSize: MainAxisSize.min,
                       children: const [
                         Text(
-                          'Update',
+                          'Submit',
                           style: TextStyle(color: Colors.black),
                         ),
                         SizedBox(
@@ -339,24 +320,26 @@ class _UpdatesState extends State<Updates> {
     final age = widget._age.text.trim();
     final phone = widget._phone.text.trim();
     final domain = widget._domain.text.trim();
+    final img = image!.path;
 
     if (widget._formkey.currentState!.validate()) {
       final student = StudentModel(
-          id: widget.model.id,
+          id: DateTime.now().millisecond.toString(),
           name: name,
           age: age,
           phone: phone,
           domain: domain,
-          img: image == null ? widget.model.img : image!.path);
+          img: img);
 
-      await updateStudent(student);
+      await addStudent(student);
 
       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-        content: Text('data updated successfully...'),
+        content: Text('data added successfully...'),
         margin: EdgeInsets.all(20),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.green,
       ));
+
       Navigator.of(ctx).pushReplacement(MaterialPageRoute(builder: (context) {
         return const Home();
       }));

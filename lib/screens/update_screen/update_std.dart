@@ -6,11 +6,12 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../functions/db_funs.dart';
 import '../../model/data_model.dart';
-import '../home.dart';
-import 'widgets/imagecolumn.dart';
+import '../list_student/list_screen.dart';
 
-class Add extends StatefulWidget {
-  Add({super.key});
+class Updates extends StatefulWidget {
+  Updates({super.key, required this.model});
+  StudentModel model;
+  int? index;
 
   final TextEditingController _name = TextEditingController();
   final TextEditingController _age = TextEditingController();
@@ -19,10 +20,20 @@ class Add extends StatefulWidget {
   final _formkey = GlobalKey<FormState>();
 
   @override
-  State<Add> createState() => _AddState();
+  State<Updates> createState() => _UpdatesState();
 }
 
-class _AddState extends State<Add> {
+class _UpdatesState extends State<Updates> {
+  @override
+  void initState() {
+    widget._name.text = widget.model.name;
+    widget._age.text = widget.model.age;
+
+    widget._phone.text = widget.model.phone;
+    widget._domain.text = widget.model.domain;
+    super.initState();
+  }
+
   File? image;
   Future pickImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.camera);
@@ -48,13 +59,11 @@ class _AddState extends State<Add> {
           borderRadius: BorderRadius.circular(30),
         ),
         backgroundColor: Colors.amber,
-        title: Center(child: Text('Add student')),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_ios),
-          color: Colors.black,
+        title: Center(
+          child: Text(
+            ' Edit student',
+            style: TextStyle(color: Colors.black),
+          ),
         ),
       ),
       body: Column(
@@ -67,10 +76,9 @@ class _AddState extends State<Add> {
           Center(
             child: CircleAvatar(
               backgroundImage: image == null
-                  ? AssetImage('images/avatar.png')
+                  ? FileImage(File(widget.model.img))
                   : FileImage(File(image!.path)) as ImageProvider,
               radius: 70,
-              backgroundColor: Colors.amber,
             ),
           ),
           SizedBox(
@@ -79,11 +87,24 @@ class _AddState extends State<Add> {
           Center(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  minimumSize: Size(150, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)),
-                  backgroundColor: Colors.amber,
-                  minimumSize: Size(200, 50)),
-              child: ImageColumn(),
+                  elevation: 10),
+              child: Column(
+                children: const [
+                  Icon(
+                    Icons.camera_alt_sharp,
+                    size: 24.0,
+                    color: Colors.black,
+                  ),
+                  Text(
+                    'Edit Image',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
               onPressed: () {
                 showModalBottomSheet(
                   backgroundColor: Colors.black,
@@ -106,8 +127,8 @@ class _AddState extends State<Add> {
                                 children: const [
                                   Icon(
                                     Icons.camera,
-                                    size: 24.0,
                                     color: Colors.black,
+                                    size: 24.0,
                                   ),
                                   Text(
                                     'Camera',
@@ -181,7 +202,6 @@ class _AddState extends State<Add> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: 'Full Name',
-                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your full name',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -206,7 +226,6 @@ class _AddState extends State<Add> {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: 'Age',
-                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your age',
                       // prefixIcon: Icon(Icons.numbers),
                       border: OutlineInputBorder(
@@ -232,9 +251,7 @@ class _AddState extends State<Add> {
                     maxLength: 10,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      prefixText: "+91 ",
                       labelText: 'phone',
-                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your phone number',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -260,8 +277,8 @@ class _AddState extends State<Add> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                       labelText: 'Domain',
-                      labelStyle: TextStyle(color: Colors.amber),
                       hintText: 'Enter your domain',
+                      // prefixIcon: Icon(Icons.email),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -282,10 +299,12 @@ class _AddState extends State<Add> {
                   padding: const EdgeInsets.all(8.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        minimumSize: Size(200, 50),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30))),
+                      backgroundColor: Colors.amber,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      elevation: 10,
+                      minimumSize: Size(200, 50),
+                    ),
                     onPressed: () {
                       log(widget._name.text);
                       addClick(context);
@@ -294,7 +313,7 @@ class _AddState extends State<Add> {
                       mainAxisSize: MainAxisSize.min,
                       children: const [
                         Text(
-                          'Submit',
+                          'Update',
                           style: TextStyle(color: Colors.black),
                         ),
                         SizedBox(
@@ -320,26 +339,24 @@ class _AddState extends State<Add> {
     final age = widget._age.text.trim();
     final phone = widget._phone.text.trim();
     final domain = widget._domain.text.trim();
-    final img = image!.path;
 
     if (widget._formkey.currentState!.validate()) {
       final student = StudentModel(
-          id: DateTime.now().millisecond.toString(),
+          id: widget.model.id,
           name: name,
           age: age,
           phone: phone,
           domain: domain,
-          img: img);
+          img: image == null ? widget.model.img : image!.path);
 
-      await addStudent(student);
+      await updateStudent(student);
 
       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
-        content: Text('data added successfully...'),
+        content: Text('data updated successfully...'),
         margin: EdgeInsets.all(20),
         behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.green,
       ));
-
       Navigator.of(ctx).pushReplacement(MaterialPageRoute(builder: (context) {
         return const Home();
       }));

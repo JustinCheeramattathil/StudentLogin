@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import '../functions/db_funs.dart';
-import '../model/data_model.dart';
-import 'update.dart';
+import '../../functions/db_funs.dart';
+import '../../model/data_model.dart';
+import '../update_screen/update_std.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
