@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:pr_2/provider/provider_statemanagement.dart';
 import 'package:pr_2/screens/add_screen/add_std.dart';
+import 'package:provider/provider.dart';
 
 import 'model/data_model.dart';
 
@@ -21,13 +23,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      routes: {
-        '/': (context) => Home(),
-        '/add': (context) => Add(),
-      },
-      initialRoute: '/',
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context)=>providerclass())
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        routes: {
+          '/': (context) => Home(),
+          '/add': (context) => Add(),
+        },
+        initialRoute: '/',
+      ),
     );
   }
 }

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pr_2/provider/provider_statemanagement.dart';
+import 'package:provider/provider.dart';
 
 import '../../functions/db_funs.dart';
 import '../../model/data_model.dart';
@@ -331,7 +333,9 @@ class _AddState extends State<Add> {
           domain: domain,
           img: img);
 
-      await addStudent(student);
+      // await addStudent(student);
+      await Provider.of<providerclass>(context, listen: false)
+          .addStudent(student);
 
       ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text('data added successfully...'),
